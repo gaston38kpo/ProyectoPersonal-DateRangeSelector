@@ -6,8 +6,8 @@ import useAdjustDateRangesFromToday from "./components/dateRangeSelector/hooks/u
 
 const dateRanges = [
     { start: "2024-11-02T00:00:00Z", end: "2024-12-05T00:00:00Z" },
-    { start: "2024-12-07T12:20:00Z", end: "2024-12-11T12:20:00Z" },
-    { start: "2024-12-15T12:20:00Z", end: "2024-12-17T12:20:00Z" },
+    { start: "2024-12-07T12:20:00Z", end: "2024-12-11T10:00:00Z" },
+    { start: "2024-12-11T15:20:00Z", end: "2024-12-17T12:20:00Z" },
     { start: "2024-12-19T12:20:01Z", end: "2024-12-25T12:20:00Z" },
 ];
 
@@ -21,6 +21,7 @@ function App() {
 
     return (
         <DateRangeSelector
+            mode={["date", "date"]}
             ranges={adjustedDateRanges}
             onChange={handleOnChange}
         />

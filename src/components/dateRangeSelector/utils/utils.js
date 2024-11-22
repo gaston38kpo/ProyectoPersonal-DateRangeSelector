@@ -15,5 +15,9 @@ const printJSON = (texto, consoleable) => {
         console.log(texto + "\n" + consoleable);
     }
 };
+const Format = {
+    UP_TO_MINUTES: "DD-MM-YYYY HH:mm",
+    UP_TO_SECONDS: "DD-MM-YYYY HH:mm:ss",
+}
 
-export { disableFromTo, printJSON };
+export { Format, disableFromTo, printJSON };

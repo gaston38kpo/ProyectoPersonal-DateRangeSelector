@@ -36,6 +36,7 @@ const DateRangeSelector = ({ ranges, onChange, ...userProps }) => {
     const combinedConfigs = defaultDateRangeConfigs(userProps);
 
     const handleOnPanelChange = (_, mode) => {
+        // TODO: Nueva implementacion para poder utilizar los selectores de meses, años y decadas (inestable)
         setCurrentMode(mode);
         setIsSelectingValue(mode[0] === "date");
     }
@@ -47,7 +48,7 @@ const DateRangeSelector = ({ ranges, onChange, ...userProps }) => {
                 disabledTime={handleDisabledTime}
                 onCalendarChange={handleOnCalendarChange}
                 onChange={onChange}
-                onPanelChange={handleOnPanelChange}
+                // onPanelChange={handleOnPanelChange}
                 preserveInvalidOnBlur={false}
                 {...combinedConfigs}
             />

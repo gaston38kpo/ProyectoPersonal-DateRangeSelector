@@ -1,8 +1,10 @@
+import { Format } from "../utils/utils";
+
 const defaultDateRangeConfigs = (userProps = {}) => {
     return {
         allowEmpty: [true, true],
         format: {
-            format: "DD-MM-YYYY HH:mm:ss",
+            format: Format.UP_TO_SECONDS,
             type: "mask",
         },
         showTime: true,

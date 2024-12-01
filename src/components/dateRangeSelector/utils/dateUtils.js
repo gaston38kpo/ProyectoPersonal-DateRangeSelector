@@ -1,9 +1,9 @@
 import dayjs from "dayjs";
 
-export const isDateBeforeToday = (current) =>
+const isDateBeforeToday = (current) =>
     current.isBefore(dayjs(), "day");
 
-export const parseDateRangesToDayjs = (dateRangesList) => {
+const parseDateRangesToDayjs = (dateRangesList) => {
     return dateRangesList.map(({ start, end }) => (
       {
         start: dayjs(start).subtract(1, "day").utc(),
@@ -12,15 +12,15 @@ export const parseDateRangesToDayjs = (dateRangesList) => {
     ))
   };
 
-export const sortDateRanges = (dateRangesList) =>
+const sortDateRanges = (dateRangesList) =>
     [...dateRangesList].sort((a, b) =>
       dayjs(a.start).isAfter(dayjs(b.start)) ? 1 : -1
     );
 
-export const removePastRanges = (sortedDateRanges) =>
+const removePastRanges = (sortedDateRanges) =>
     sortedDateRanges.filter(({ end }) => dayjs(end).isAfter(dayjs()));
 
-export const adjustFirstRangeForToday = (rangesAfterToday) => {
+const adjustFirstRangeForToday = (rangesAfterToday) => {
     const [firstRange, ...remainingRanges] = rangesAfterToday;
     const { start, end } = firstRange;
     
@@ -35,4 +35,12 @@ export const adjustFirstRangeForToday = (rangesAfterToday) => {
       : firstRange;
 
     return [adjustedFirstRange, ...remainingRanges];
+  };
+
+  export {
+    isDateBeforeToday,
+    parseDateRangesToDayjs,
+    sortDateRanges,
+    removePastRanges,
+    adjustFirstRangeForToday,
   };

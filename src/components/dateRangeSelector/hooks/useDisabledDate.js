@@ -1,15 +1,16 @@
 import dayjs from "dayjs";
+import { useState } from "react";
 
 const useDisabledDate = ({
   currentMode,
-  currentNamedValueSelected,
   ranges,
   currentRange,
   isSelectingValue,
   value,
-  setCurrentNamedValueSelected,
   setIsSelectingValue,
 }) => {
+    const [currentNamedValueSelected, setCurrentNamedValueSelected] = useState(null);
+
     const handleDisabledDate = (currentCalendarDate) => {
         // Aqui comienza, se ejecuta secuencialmente por cada dia mostrado en el calendario
         // habilitandolo (false) y deshabilitandolo (true).

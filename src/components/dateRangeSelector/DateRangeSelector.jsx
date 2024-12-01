@@ -36,9 +36,10 @@ const DateRangeSelector = ({ ranges, onChange, ...userProps }) => {
     const combinedConfigs = defaultDateRangeConfigs(userProps);
 
     const handleOnPanelChange = (_, mode) => {
-        // TODO: Nueva implementacion para poder utilizar los selectores de meses, años y decadas (inestable)
+        // TODO: Testear porque al dar aceptar en un año queda un modo que no es date al mostrar dias
         setCurrentMode(mode);
-        setIsSelectingValue(mode[0] === "date");
+        console.log(mode)
+        setIsSelectingValue(mode[0] !== "date");
     }
 
     return (
@@ -48,7 +49,7 @@ const DateRangeSelector = ({ ranges, onChange, ...userProps }) => {
                 disabledTime={handleDisabledTime}
                 onCalendarChange={handleOnCalendarChange}
                 onChange={onChange}
-                // onPanelChange={handleOnPanelChange}
+                onPanelChange={handleOnPanelChange}
                 preserveInvalidOnBlur={false}
                 {...combinedConfigs}
             />

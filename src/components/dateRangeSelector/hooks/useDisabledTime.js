@@ -11,15 +11,15 @@ const useDisabledTime = ({
         // Aqui comienza, se ejecuta en cada dia elegido del calendario
         // habilitando ([]) y deshabilitando ([1,2,3...]) las horas, min y seg
         if (currentMode[0] !== "date") return false;
+        const [currentRangeStart, currentRangeEnd] = currentRange.current;
 
-        if (!isSelectingValue)
+        if (!isSelectingValue || !currentRange.current.length)
             return {
                 disabledHours: () => disableFromTo(0, 24),
                 disabledMinutes: () => disableFromTo(0, 60),
                 disabledSeconds: () => disableFromTo(0, 60),
             };
-
-        const [currentRangeStart, currentRangeEnd] = currentRange.current;
+            
         const [valueStart, valueEnd] = value.current;
 
         const baseDate = type === "start" ? valueStart : valueEnd;

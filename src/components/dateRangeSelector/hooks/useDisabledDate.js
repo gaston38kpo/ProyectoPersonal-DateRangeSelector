@@ -16,9 +16,10 @@ const useDisabledDate = ({
         // habilitandolo (false) y deshabilitandolo (true).
         if (currentMode[0] !== "date") return false;
 
-        return isSelectingValue
-            ? !isDateBetweenSelectedRange(currentCalendarDate)
-            : !isDateInSomeValidRange(currentCalendarDate);
+        if (isSelectingValue)
+            return !isDateBetweenSelectedRange(currentCalendarDate);
+        else
+            return !isDateInSomeValidRange(currentCalendarDate);
     };
 
     const isDateBetweenSelectedRange = (currentCalendarDate) => {

@@ -21,7 +21,7 @@ function App() {
 
     return (
         <DateRangeSelector
-            mode={["date", "date"]}
+            // mode={["date", "date"]}
             ranges={adjustedDateRanges}
             onChange={handleOnChange}
         />

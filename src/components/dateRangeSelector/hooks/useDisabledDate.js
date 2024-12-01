@@ -2,11 +2,13 @@ import dayjs from "dayjs";
 
 const useDisabledDate = ({
   currentMode,
+  currentNamedValueSelected,
+  ranges,
   currentRange,
   isSelectingValue,
-  ranges,
-  setIsSelectingValue,
   value,
+  setCurrentNamedValueSelected,
+  setIsSelectingValue,
 }) => {
     const handleDisabledDate = (currentCalendarDate) => {
         // Aqui comienza, se ejecuta secuencialmente por cada dia mostrado en el calendario
@@ -35,10 +37,9 @@ const useDisabledDate = ({
     const getCurrentRange = () => {
         const [start, end] = value.current;
 
-        const currentDateRangeFind = ranges.find(
-            ({ start: dateRangeStart, end: dateRangeEnd }) => {
-                const startInRange = !start || start.isBetween(dateRangeStart, dateRangeEnd, null, "[]");
-                const endInRange = !end || end.isBetween(dateRangeStart, dateRangeEnd, null, "[]");
+        const currentDateRangeFind = ranges.find(({ start: dateRangeStart, end: dateRangeEnd }) => {
+                const startInRange = !start || adjustAccordingNamedValueSelected(start).isBetween(dateRangeStart, dateRangeEnd, null, "[]");
+                const endInRange = !end || adjustAccordingNamedValueSelected(end).isBetween(dateRangeStart, dateRangeEnd, null, "[]");
 
                 return startInRange && endInRange;
             },
@@ -47,13 +48,29 @@ const useDisabledDate = ({
         return currentDateRangeFind || null;
     };
 
+    const adjustAccordingNamedValueSelected = (date) => {
+        
+        if (!currentNamedValueSelected)
+            return date;
+
+        if (currentNamedValueSelected === "start")
+            return date.endOf("day");
+        
+        if (currentNamedValueSelected === "end")
+            return date.startOf("day");
+    };
+
     const isDateInSomeValidRange = (currentCalendarDate) => {
         return ranges.some(({ start: rangeStart, end: rangeEnd }) =>
             currentCalendarDate.isBetween(rangeStart, rangeEnd, null, "[]"),
         );
     };
 
-    const handleOnCalendarChange = (dates) => {
+    const handleOnCalendarChange = (dates, _, info) => {
+        const { range } = info;
+
+        setCurrentNamedValueSelected(range)
+
         const [selectedValueStart, selectedValueEnd] = dates;
 
         value.current = [selectedValueStart, selectedValueEnd];

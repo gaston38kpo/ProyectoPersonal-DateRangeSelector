@@ -16,13 +16,16 @@ const DateRangeSelector = ({ ranges, onChange, ...userProps }) => {
     
     const [currentMode, setCurrentMode] = useState(['date', 'date']);
     const [isSelectingValue, setIsSelectingValue] = useState(false);
+    const [currentNamedValueSelected, setCurrentNamedValueSelected] = useState(null);
 
     const { handleDisabledDate, handleOnCalendarChange } = useDisabledDate({
         currentMode,
+        currentNamedValueSelected,
         ranges,
         currentRange,
         isSelectingValue,
         value,
+        setCurrentNamedValueSelected,
         setIsSelectingValue,
     });
 

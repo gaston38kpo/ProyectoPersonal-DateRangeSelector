@@ -49,15 +49,16 @@ const useDisabledDate = ({
     };
 
     const adjustAccordingNamedValueSelected = (date) => {
+        const [start, end] = value.current;
         
         if (!currentNamedValueSelected)
             return date;
-
+        
         if (currentNamedValueSelected === "start")
-            return date.endOf("day");
+            return end ? date.endOf("day") : date.startOf("day");
         
         if (currentNamedValueSelected === "end")
-            return date.startOf("day");
+            return start ? date.startOf("day") :  date.endOf("day");
     };
 
     const isDateInSomeValidRange = (currentCalendarDate) => {

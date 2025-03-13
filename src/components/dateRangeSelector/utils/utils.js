@@ -1,12 +1,12 @@
+/* eslint-disable no-console */
 const disableFromTo = (start, end) => {
     // eslint-disable-next-line func-style
-    function* range (start, end) {
+    function* generateRange (start, end) {
         for (let i = start; i < end; i++) 
-            yield i;
-        
+            yield i;        
     }
 
-    return [...range(start, end)];
+    return [...generateRange(start, end)];
 };
 
 const printJSON = (texto, consoleable) => {

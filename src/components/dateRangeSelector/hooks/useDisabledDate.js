@@ -1,13 +1,14 @@
+/* eslint-disable no-magic-numbers */
 import dayjs from "dayjs";
 import { useState } from "react";
 
 const useDisabledDate = ({
-  currentMode,
-  ranges,
-  currentRange,
-  isSelectingValue,
-  value,
-  setIsSelectingValue,
+    currentMode,
+    currentRange,
+    isSelectingValue,
+    ranges,
+    setIsSelectingValue,
+    value,
 }) => {
     const [currentNamedValueSelected, setCurrentNamedValueSelected] = useState(null);
 
@@ -29,7 +30,7 @@ const useDisabledDate = ({
 
         if (!range) return;
 
-        const { start, end } = range;
+        const { end, start } = range;
 
         currentRange.current = [dayjs(start), dayjs(end)];
 
@@ -39,12 +40,12 @@ const useDisabledDate = ({
     const getCurrentRange = () => {
         const [start, end] = value.current;
 
-        const currentDateRangeFind = ranges.find(({ start: dateRangeStart, end: dateRangeEnd }) => {
-                const startInRange = !start || adjustAccordingNamedValueSelected(start).isBetween(dateRangeStart, dateRangeEnd, null, "[]");
-                const endInRange = !end || adjustAccordingNamedValueSelected(end).isBetween(dateRangeStart, dateRangeEnd, null, "[]");
+        const currentDateRangeFind = ranges.find(({ end: dateRangeEnd, start: dateRangeStart }) => {
+            const startInRange = !start || adjustAccordingNamedValueSelected(start).isBetween(dateRangeStart, dateRangeEnd, null, "[]");
+            const endInRange = !end || adjustAccordingNamedValueSelected(end).isBetween(dateRangeStart, dateRangeEnd, null, "[]");
 
-                return startInRange && endInRange;
-            },
+            return startInRange && endInRange;
+        }
         );
 
         return currentDateRangeFind || null;
@@ -60,19 +61,19 @@ const useDisabledDate = ({
             return end ? date.endOf("day") : date.startOf("day");
         
         if (currentNamedValueSelected === "end")
-            return start ? date.startOf("day") :  date.endOf("day");
+            return start ? date.startOf("day") : date.endOf("day");
     };
 
     const isDateInSomeValidRange = (currentCalendarDate) => {
-        return ranges.some(({ start: rangeStart, end: rangeEnd }) =>
-            currentCalendarDate.isBetween(rangeStart, rangeEnd, null, "[]"),
+        return ranges.some(({ end: rangeEnd, start: rangeStart }) =>
+            currentCalendarDate.isBetween(rangeStart, rangeEnd, null, "[]")
         );
     };
 
     const handleOnCalendarChange = (dates, _, info) => {
         const { range } = info;
 
-        setCurrentNamedValueSelected(range)
+        setCurrentNamedValueSelected(range);
 
         const [selectedValueStart, selectedValueEnd] = dates;
 

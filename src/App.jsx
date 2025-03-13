@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable no-magic-numbers */
 /* eslint-disable no-unused-vars */
 import React from "react";
 
@@ -5,13 +7,13 @@ import DateRangeSelector from "./components/dateRangeSelector/DateRangeSelector"
 import useAdjustDateRangesFromToday from "./components/dateRangeSelector/hooks/useAdjustDateRangesFromToday";
 
 const dateRanges = [
-    { start: "2024-11-02T00:00:00Z", end: "2024-12-05T00:00:00Z" },
-    { start: "2024-12-07T12:20:00Z", end: "2024-12-11T10:00:00Z" },
-    { start: "2024-12-11T15:20:00Z", end: "2024-12-17T12:20:00Z" },
-    { start: "2024-12-19T12:20:01Z", end: "2024-12-25T12:20:00Z" },
+    { start: "2025-03-02T00:00:00Z", end: "2025-04-05T00:00:00Z" },
+    { start: "2025-04-07T12:20:00Z", end: "2025-04-11T10:00:00Z" },
+    { start: "2025-04-11T15:20:00Z", end: "2025-04-17T12:20:00Z" },
+    { start: "2025-04-19T12:20:01Z", end: "2025-04-25T12:20:00Z" },
 ];
 
-function App() {
+const App = () => {
     const { adjustedDateRanges } = useAdjustDateRangesFromToday({ dateRanges });
 
     const handleOnChange = (range) => {
@@ -22,10 +24,10 @@ function App() {
     return (
         <DateRangeSelector
             // mode={["date", "date"]}
-            ranges={adjustedDateRanges}
             onChange={handleOnChange}
+            ranges={adjustedDateRanges}
         />
     );
-}
+};
 
 export default App;

@@ -7,7 +7,7 @@ const defaultDateRangeConfigs = (userProps = {}) => {
             format: Format.UP_TO_SECONDS,
             type: "mask",
         },
-        showTime: true,
+        // showTime: true,
         ...userProps,
     };
 };

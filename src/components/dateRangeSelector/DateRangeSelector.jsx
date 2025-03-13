@@ -10,11 +10,11 @@ import DateRangeSelectorLayout from "./DateRangeSelectorLayout";
 import useDisabledDate from "./hooks/useDisabledDate";
 import useDisabledTime from "./hooks/useDisabledTime";
 
-const DateRangeSelector = ({ ranges, onChange, ...userProps }) => {
+const DateRangeSelector = ({ onChange, ranges, ...userProps }) => {
     const currentRange = useRef([]);
     const value = useRef([null, null]);
-    
-    const [currentMode, setCurrentMode] = useState(['date', 'date']);
+
+    const [currentMode, setCurrentMode] = useState(["date", "date"]);
     const [isSelectingValue, setIsSelectingValue] = useState(false);
 
     const { handleDisabledDate, handleOnCalendarChange } = useDisabledDate({
@@ -36,11 +36,16 @@ const DateRangeSelector = ({ ranges, onChange, ...userProps }) => {
     const combinedConfigs = defaultDateRangeConfigs(userProps);
 
     const handleOnPanelChange = (_, mode) => {
-        // TODO: Testear porque al dar aceptar en un año queda un modo que no es date al mostrar dias
-        setCurrentMode(mode);
-        console.log(mode)
-        setIsSelectingValue(mode[0] !== "date");
-    }
+        if (mode.includes("year") || mode.includes("month")) {
+            setCurrentMode(mode);
+            setIsSelectingValue(true);
+        } else {
+            setCurrentMode(["date", "date"]);
+            const [valueStart, valueEnd] = value.current;
+            if (!valueStart && !valueEnd)
+                setIsSelectingValue(false);
+        }
+    };
 
     return (
         <DateRangeSelectorLayout>
@@ -70,9 +75,9 @@ DateRangeSelector.propTypes = {
                 PropTypes.instanceOf(Date),
                 PropTypes.string,
             ]).isRequired,
-        }),
+        })
     ).isRequired,
-    onChange: PropTypes.func
+    onChange: PropTypes.func,
 };
 
 export default DateRangeSelector;

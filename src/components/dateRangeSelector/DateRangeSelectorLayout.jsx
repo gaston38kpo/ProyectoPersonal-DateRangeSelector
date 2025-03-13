@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
-import React from 'react';
+import React from "react";
 
-import { ConfigProvider, DatePicker } from 'antd';
+import { ConfigProvider, DatePicker } from "antd";
 // import es from "antd/locale/es_ES";
 
 import dayjs from "dayjs";
@@ -27,12 +27,12 @@ DateRangeSelectorLayout.propTypes = {
     children: (props, propName, componentName) => {
         const child = props[propName];
 
-        if (child && child.type !== DatePicker.RangePicker) {
+        if (child && child.type !== DatePicker.RangePicker) 
             return new Error(
                 `${componentName} espera un elemento 'DatePicker.RangePicker' como children.`
             );
-        }
-    }
+        
+    },
 };
 
 export default DateRangeSelectorLayout;

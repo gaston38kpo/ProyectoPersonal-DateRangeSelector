@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 import { disableFromTo } from "../utils/utils";
 
 
@@ -29,21 +30,21 @@ const useDisabledTime = ({
         const isBaseDateSameCurrentRangeStart = baseDate.isSame(currentRangeStart.add(1, "day"), "day");
         const isBaseDateSameCurrentRangeEnd = baseDate.isSame(currentRangeEnd, "day");
 
-        if (isBaseDateSameCurrentRangeStart) {
+        if (isBaseDateSameCurrentRangeStart) 
             return {
                 disabledHours: () => getDisabledHoursFromRangeStart(currentRangeStart),
                 disabledMinutes: () => getDisabledMinutesFromRangeStart(currentRangeStart, baseDate),
                 disabledSeconds: () => getDisabledSecondsFromRangeStart(currentRangeStart, baseDate),
             };
-        }
         
-        if (isBaseDateSameCurrentRangeEnd) {
+        
+        if (isBaseDateSameCurrentRangeEnd) 
             return {
                 disabledHours: () => getDisabledHoursFromRangeEnd(currentRangeEnd),
                 disabledMinutes: () => getDisabledMinutesFromRangeEnd(currentRangeEnd, baseDate),
                 disabledSeconds: () => getDisabledSecondsFromRangeEnd(currentRangeEnd, baseDate),
             };
-        }
+        
     };
 
 
@@ -61,8 +62,8 @@ const useDisabledTime = ({
     const getDisabledSecondsFromRangeStart = (currentRangeStart, baseDate) => {
         return currentRangeStart.hour() === baseDate.hour()
             && currentRangeStart.minute() === baseDate.minute()
-                ? disableFromTo(0, currentRangeStart.second() + 1)
-                : [];
+            ? disableFromTo(0, currentRangeStart.second() + 1)
+            : [];
     };
 
 
@@ -80,8 +81,8 @@ const useDisabledTime = ({
     const getDisabledSecondsFromRangeEnd = (currentRangeEnd, baseDate) => {
         return currentRangeEnd.hour() === baseDate.hour()
             && currentRangeEnd.minute() === baseDate.minute()
-                ? disableFromTo(currentRangeEnd.second(), 60)
-                : [];
+            ? disableFromTo(currentRangeEnd.second(), 60)
+            : [];
     };
 
     return { handleDisabledTime };

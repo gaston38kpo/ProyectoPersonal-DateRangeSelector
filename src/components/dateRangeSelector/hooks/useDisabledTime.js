@@ -69,11 +69,18 @@ const useDisabledTime = ({
 
     // Horario limite dada la hora de fin del rango actual
     const getDisabledHoursFromRangeEnd = (currentRangeEnd) => {
-        return disableFromTo(currentRangeEnd.hour(), 24);
+        // Si el fin es exacto en la hora (HH:00:00), deshabilitar esa hora completa;
+        // en caso contrario, permitir la hora fin y deshabilitar solo las posteriores.
+        const endH = currentRangeEnd.hour();
+        const endM = currentRangeEnd.minute();
+        const endS = currentRangeEnd.second();
+        const from = endM === 0 && endS === 0 ? endH : endH + 1;
+        return disableFromTo(from, 24);
     };
 
     const getDisabledMinutesFromRangeEnd = (currentRangeEnd, baseDate) => {
         return currentRangeEnd.hour() === baseDate.hour()
+            // Deshabilitar desde el minuto final inclusive (límite exclusivo)
             ? disableFromTo(currentRangeEnd.minute(), 60)
             : [];
     };
@@ -81,6 +88,7 @@ const useDisabledTime = ({
     const getDisabledSecondsFromRangeEnd = (currentRangeEnd, baseDate) => {
         return currentRangeEnd.hour() === baseDate.hour()
             && currentRangeEnd.minute() === baseDate.minute()
+            // Deshabilitar desde el segundo final inclusive (límite exclusivo)
             ? disableFromTo(currentRangeEnd.second(), 60)
             : [];
     };

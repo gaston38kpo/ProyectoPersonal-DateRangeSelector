@@ -1,9 +1,8 @@
-/* eslint-disable no-console */
 /* eslint-disable no-magic-numbers */
-/* eslint-disable sort-keys */
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 
-import { Button, Card, Divider, Select, Space, Switch, Tag, Typography } from "antd";
+import { Card, Layout, Select, Space, Tooltip, Typography } from "antd";
+import { InfoCircleOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 
@@ -13,171 +12,213 @@ import { Format } from "../dateRangeSelector/utils/utils";
 
 dayjs.extend(utc);
 
+const { Content, Footer, Header } = Layout;
 const { Text, Title } = Typography;
 
-// Helper para construir rangos relativos a hoy (en UTC ISO)
-const mkRange = ({ endDays = 0, endH = 23, endM = 59, startDays = 0, startH = 0, startM = 0 }) => {
-    const start = dayjs().add(startDays, "day").hour(startH).minute(startM).second(0).utc().format();
-    const end = dayjs().add(endDays, "day").hour(endH).minute(endM).second(0).utc().format();
+// Rango simple por defecto (ajustado a hoy dinámicamente) con soporte de segundos
+const mkRange = ({ endDays = 3, endH = 18, endM = 0, endS = 0, startDays = 0, startH = 8, startM = 0, startS = 0 }) => {
+    const start = dayjs().add(startDays, "day").hour(startH).minute(startM).second(startS).utc().format();
+    const end = dayjs().add(endDays, "day").hour(endH).minute(endM).second(endS).utc().format();
     return { start, end };
 };
 
-const presets = {
-    basico: [
-        mkRange({ startDays: 0, startH: 8, startM: 0, endDays: 2, endH: 18, endM: 0 }),
-        mkRange({ startDays: 4, startH: 9, startM: 30, endDays: 6, endH: 17, endM: 30 }),
-    ],
-    dosVentanas: [
-        mkRange({ startDays: 1, startH: 0, startM: 0, endDays: 7, endH: 23, endM: 59 }),
-        mkRange({ startDays: 10, startH: 0, startM: 0, endDays: 14, endH: 23, endM: 59 }),
-        mkRange({ startDays: 18, startH: 8, startM: 0, endDays: 21, endH: 18, endM: 0 }),
-    ],
-    conHoras: [
-        mkRange({ startDays: 0, startH: 13, startM: 0, endDays: 0, endH: 18, endM: 0 }),
-        mkRange({ startDays: 2, startH: 9, startM: 0, endDays: 3, endH: 12, endM: 30 }),
-        mkRange({ startDays: 5, startH: 14, startM: 0, endDays: 7, endH: 19, endM: 0 }),
-    ],
-};
+const DEFAULT_RANGES = [
+    mkRange({ startDays: 0, startH: 8, startM: 0, endDays: 2, endH: 18, endM: 0 }),
+    mkRange({ startDays: 4, startH: 9, startM: 30, endDays: 6, endH: 17, endM: 30 }),
+];
 
 const Dashboard = () => {
-    const [scenario, setScenario] = useState("basico");
-    const [rawRanges, setRawRanges] = useState(presets["basico"]);
-    const [showTime, setShowTime] = useState(true);
-    const [fmt, setFmt] = useState(Format.UP_TO_SECONDS);
     const [selected, setSelected] = useState([null, null]);
-
+    const [rawRanges, setRawRanges] = useState(DEFAULT_RANGES);
     const { adjustedDateRanges } = useAdjustDateRangesFromToday({ dateRanges: rawRanges });
-
-    const formatOptions = useMemo(
-        () => [
-            { value: Format.UP_TO_SECONDS, label: "DD-MM-YYYY HH:mm:ss" },
-            { value: Format.UP_TO_MINUTES, label: "DD-MM-YYYY HH:mm" },
-        ],
-        []
-    );
-
-    const scenarioOptions = useMemo(
-        () => [
-            { value: "basico", label: "Básico (3 días + 3 días)" },
-            { value: "dosVentanas", label: "Dos/3 ventanas a futuro" },
-            { value: "conHoras", label: "Con horas restringidas" },
-        ],
-        []
-    );
-
-    const handleScenarioChange = (value) => {
-        setScenario(value);
-        setRawRanges(presets[value] ?? []);
-        setSelected([null, null]);
-    };
-
-    const handleRandomize = () => {
-        // Genera 2-4 rangos aleatorios a los próximos 30 días
-        const count = Math.floor(Math.random() * 3) + 2; // 2..4
-        const list = Array.from({ length: count }, () => {
-            const s = Math.floor(Math.random() * 25); // día de inicio 0..24
-            const e = s + Math.floor(Math.random() * 5) + 1; // duración 1..5 días
-            const startH = [8, 9, 13, 14][Math.floor(Math.random() * 4)];
-            const endH = [12, 17, 18, 19, 23][Math.floor(Math.random() * 5)];
-            return mkRange({ startDays: s, startH, startM: 0, endDays: e, endH, endM: 0 });
-        }).sort((a, b) => (dayjs(a.start).isAfter(dayjs(b.start)) ? 1 : -1));
-        setRawRanges(list);
-        setScenario("custom");
-        setSelected([null, null]);
-    };
 
     const handleOnChange = (range) => {
         setSelected(range);
-        if (range?.[0] && range?.[1]) console.log("Seleccion:", range[0].format(), "->", range[1].format());
     };
 
+    const eligiblePresets = [
+        {
+            label: "Básico",
+            ranges: [
+                mkRange({ endDays: 2, endH: 18, endM: 0, startDays: 0, startH: 8, startM: 0 }),
+                mkRange({ endDays: 6, endH: 17, endM: 30, startDays: 4, startH: 9, startM: 30 }),
+            ],
+        },
+        {
+            label: "Dos ventanas",
+            ranges: [
+                mkRange({ endDays: 7, endH: 23, endM: 59, startDays: 1, startH: 0, startM: 0 }),
+                mkRange({ endDays: 14, endH: 23, endM: 59, startDays: 10, startH: 0, startM: 0 }),
+            ],
+        },
+        {
+            label: "Con horas",
+            ranges: [
+                mkRange({ endDays: 0, endH: 18, endM: 0, startDays: 0, startH: 13, startM: 0 }),
+                mkRange({ endDays: 3, endH: 12, endM: 30, startDays: 2, startH: 9, startM: 0 }),
+            ],
+        },
+        {
+            label: "Segundos cortos",
+            ranges: [
+                mkRange({ endDays: 1, endH: 10, endM: 15, endS: 45, startDays: 1, startH: 10, startM: 15, startS: 10 }),
+                mkRange({ endDays: 1, endH: 12, endM: 0, endS: 1, startDays: 1, startH: 12, startM: 0, startS: 0 }),
+            ],
+        },
+        {
+            label: "Minutos pico",
+            ranges: [
+                mkRange({ endDays: 2, endH: 9, endM: 1, endS: 0, startDays: 2, startH: 8, startM: 59, startS: 0 }),
+                mkRange({ endDays: 2, endH: 17, endM: 31, endS: 0, startDays: 2, startH: 17, startM: 29, startS: 30 }),
+            ],
+        },
+        {
+            label: "Medianoche exacta",
+            ranges: [
+                mkRange({ endDays: 2, endH: 0, endM: 0, endS: 0, startDays: 1, startH: 22, startM: 0, startS: 0 }),
+                mkRange({ endDays: 3, endH: 0, endM: 0, endS: 0, startDays: 3, startH: 0, startM: 0, startS: 0 }),
+            ],
+        },
+        {
+            label: "Fin en hora exacta",
+            ranges: [
+                mkRange({ endDays: 5, endH: 12, endM: 0, endS: 0, startDays: 5, startH: 8, startM: 0, startS: 0 }),
+                mkRange({ endDays: 5, endH: 18, endM: 0, endS: 0, startDays: 5, startH: 13, startM: 15, startS: 0 }),
+            ],
+        },
+        {
+            label: "Superpuestas",
+            ranges: [
+                mkRange({ endDays: 6, endH: 12, endM: 0, endS: 0, startDays: 6, startH: 9, startM: 0, startS: 0 }),
+                mkRange({ endDays: 6, endH: 15, endM: 0, endS: 0, startDays: 6, startH: 11, startM: 0, startS: 0 }),
+                mkRange({ endDays: 6, endH: 19, endM: 0, endS: 0, startDays: 6, startH: 14, startM: 30, startS: 0 }),
+            ],
+        },
+        {
+            label: "Dispersas múltiples",
+            ranges: [
+                mkRange({ endDays: 7, endH: 23, endM: 59, endS: 59, startDays: 7, startH: 0, startM: 0, startS: 0 }),
+                mkRange({ endDays: 9, endH: 10, endM: 45, endS: 0, startDays: 9, startH: 10, startM: 0, startS: 0 }),
+                mkRange({ endDays: 12, endH: 18, endM: 5, endS: 15, startDays: 12, startH: 16, startM: 20, startS: 30 }),
+                mkRange({ endDays: 15, endH: 20, endM: 0, endS: 0, startDays: 15, startH: 8, startM: 0, startS: 0 }),
+            ],
+        },
+        {
+            label: "Ventanas muy cortas",
+            ranges: [
+                mkRange({ endDays: 1, endH: 9, endM: 0, endS: 5, startDays: 1, startH: 9, startM: 0, startS: 0 }),
+                mkRange({ endDays: 1, endH: 9, endM: 0, endS: 12, startDays: 1, startH: 9, startM: 0, startS: 10 }),
+                mkRange({ endDays: 1, endH: 9, endM: 1, endS: 1, startDays: 1, startH: 9, startM: 1, startS: 0 }),
+            ],
+        },
+    ];
+
     return (
-        <Space direction="vertical" size={16} style={{ padding: 16, width: "100%" }}>
-            <Title level={3}>
-                Dashboard de pruebas - DateRangeSelector
-            </Title>
+        <Layout style={{ minHeight: "100vh" }}>
+            <Header style={{ background: "#fff", padding: "12px 16px", borderBottom: "1px solid #f0f0f0" }}>
+                <Title level={4} style={{ margin: 0 }}>
+                    Demo DateRangeSelector
+                </Title>
+            </Header>
+            <Content style={{ padding: 16 }}>
+                <Space direction="vertical" size={16} style={{ width: "100%" }}>
+                    <Card
+                        size="small"
+                        title={
+                            <Space size={4}>
+                                <span>
+                                    Elegibles (raw)
+                                </span>
+                                <Tooltip title="Rangos tal como vienen del preset (sin normalización).">
+                                    <InfoCircleOutlined />
+                                </Tooltip>
+                            </Space>
+                        }
+                    >
+                        {rawRanges.length === 0 ? (
+                            <Text type="secondary">
+                                (vacío)
+                            </Text>
+                        ) : (
+                            <Space direction="vertical" size={4} style={{ width: "100%" }}>
+                                {rawRanges.map((r, idx) => (
+                                    <Text key={`${r.start}-${r.end}-${idx}`}>
+                                        <span title={dayjs(r.start).toISOString()}>
+                                            {dayjs(r.start).format("DD/MM/YYYY HH:mm")}
+                                        </span>
+                                        <span>
+                                            →
+                                        </span>
+                                        <span title={dayjs(r.end).toISOString()}>
+                                            {dayjs(r.end).format("DD/MM/YYYY HH:mm")}
+                                        </span>
+                                    </Text>
+                                ))}
+                            </Space>
+                        )}
+                    </Card>
 
-            <Card size="small" title="Configuración">
-                <Space style={{ gap: 8 }} wrap>
-                    <Space direction="vertical" size={2}>
-                        <Text strong>
-                            Escenario
-                        </Text>
+                    <Card
+                        size="small"
+                        title={
+                            <Space size={4}>
+                                <span>
+                                    Elegibles (ajustados)
+                                </span>
+                                <Tooltip title="Rangos normalizados respecto a hoy: se quitan pasados, se recorta el primero si toca hoy y se convierten a dayjs para la lógica del selector.">
+                                    <InfoCircleOutlined />
+                                </Tooltip>
+                            </Space>
+                        }
+                    >
+                        {adjustedDateRanges.length === 0 ? (
+                            <Text type="secondary">
+                                (vacío)
+                            </Text>
+                        ) : (
+                            <Space direction="vertical" size={4} style={{ width: "100%" }}>
+                                {adjustedDateRanges.map((r, idx) => (
+                                    <Text key={`${r.start}-${r.end}-${idx}`}>
+                                        <span title={dayjs(r.start).toISOString()}>
+                                            {dayjs(r.start).format("DD/MM/YYYY HH:mm")}
+                                        </span>
+                                        <span>
+                                            →
+                                        </span>
+                                        <span title={dayjs(r.end).toISOString()}>
+                                            {dayjs(r.end).format("DD/MM/YYYY HH:mm")}
+                                        </span>
+                                    </Text>
+                                ))}
+                            </Space>
+                        )}
+                    </Card>
+                    <Card size="small" title="Fechas predefinidas (elegibles)">
                         <Select
-                            onChange={handleScenarioChange}
-                            options={scenarioOptions}
-                            style={{ minWidth: 240 }}
-                            value={scenario}
+                            onChange={(key) => {
+                                const preset = eligiblePresets.find((p) => p.label === key);
+                                if (preset) {
+                                    setSelected([null, null]);
+                                    setRawRanges(preset.ranges);
+                                }
+                            }}
+                            options={eligiblePresets.map((p) => ({ label: p.label, value: p.label }))}
+                            placeholder="Selecciona un preset de elegibles"
+                            style={{ minWidth: 260 }}
+                            value={null}
                         />
-                    </Space>
-
-                    <Space direction="vertical" size={2}>
-                        <Text strong>
-                            Formato
-                        </Text>
-                        <Select
-                            onChange={setFmt}
-                            options={formatOptions}
-                            style={{ minWidth: 240 }}
-                            value={fmt}
+                    </Card>
+                    <Card size="small" title="Selecciona un rango">
+                        <DateRangeSelector
+                            allowEmpty={[true, true]}
+                            format={{ format: Format.UP_TO_MINUTES, type: "mask" }}
+                            onChange={handleOnChange}
+                            ranges={adjustedDateRanges}
+                            showTime
                         />
-                    </Space>
+                    </Card>
 
-                    <Space direction="vertical" size={2}>
-                        <Text strong>
-                            Tiempo
-                        </Text>
-                        <Switch checked={showTime} onChange={setShowTime} />
-                    </Space>
-
-                    <Button onClick={handleRandomize}>
-                        Generar aleatorios
-                    </Button>
-                </Space>
-            </Card>
-
-            <Card size="small" title="Selector">
-                <DateRangeSelector
-                    allowEmpty={[true, true]}
-                    format={{ format: fmt, type: "mask" }}
-                    onChange={handleOnChange}
-                    ranges={adjustedDateRanges}
-                    showTime={showTime}
-                />
-            </Card>
-
-            <Card size="small" title="Estado">
-                <Space direction="vertical" size={8} style={{ width: "100%" }}>
-                    <div>
-                        <Text strong>
-                            Rangos activos (
-                            {adjustedDateRanges.length}
-                            ):
-                        </Text>
-                        <Space style={{ marginTop: 8 }} wrap>
-                            {adjustedDateRanges.length === 0 && (
-                                <Text type="secondary">
-                                    Sin rangos válidos respecto de hoy
-                                </Text>
-                            )}
-                            {adjustedDateRanges.map((r, idx) => (
-                                <Tag color="blue" key={`${r.start}-${r.end}-${idx}`}>
-                                    {dayjs(r.start).format("DD/MM HH:mm")}
-                                    <span>
-                                        →
-                                    </span>
-                                    {dayjs(r.end).format("DD/MM HH:mm")}
-                                </Tag>
-                            ))}
-                        </Space>
-                    </div>
-
-                    <Divider style={{ margin: "8px 0" }} />
-
-                    <div>
-                        <Text strong>
-                            Selección:
-                        </Text>
+                    <Card size="small" title="Resultado">
                         {selected?.[0] && selected?.[1] ? (
                             <Text>
                                 {selected[0].format("DD/MM/YYYY HH:mm:ss")}
@@ -191,10 +232,13 @@ const Dashboard = () => {
                                 (vacío)
                             </Text>
                         )}
-                    </div>
+                    </Card>
                 </Space>
-            </Card>
-        </Space>
+            </Content>
+            <Footer style={{ textAlign: "center" }}>
+                DateRangeSelector • Ant Design
+            </Footer>
+        </Layout>
     );
 };
 

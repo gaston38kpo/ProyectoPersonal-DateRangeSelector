@@ -5,6 +5,7 @@ import { disableFromTo } from "../utils/utils";
 const useDisabledTime = ({
     currentMode,
     currentRange,
+    hasSecondsPrecision,
     isSelectingValue,
     value,
 }) => {
@@ -34,7 +35,7 @@ const useDisabledTime = ({
             return {
                 disabledHours: () => getDisabledHoursFromRangeStart(currentRangeStart),
                 disabledMinutes: () => getDisabledMinutesFromRangeStart(currentRangeStart, baseDate),
-                disabledSeconds: () => getDisabledSecondsFromRangeStart(currentRangeStart, baseDate),
+                disabledSeconds: () => hasSecondsPrecision ? getDisabledSecondsFromRangeStart(currentRangeStart, baseDate) : [],
             };
         
         
@@ -42,7 +43,7 @@ const useDisabledTime = ({
             return {
                 disabledHours: () => getDisabledHoursFromRangeEnd(currentRangeEnd),
                 disabledMinutes: () => getDisabledMinutesFromRangeEnd(currentRangeEnd, baseDate),
-                disabledSeconds: () => getDisabledSecondsFromRangeEnd(currentRangeEnd, baseDate),
+                disabledSeconds: () => hasSecondsPrecision ? getDisabledSecondsFromRangeEnd(currentRangeEnd, baseDate) : [],
             };
         
     };
@@ -79,10 +80,13 @@ const useDisabledTime = ({
     };
 
     const getDisabledMinutesFromRangeEnd = (currentRangeEnd, baseDate) => {
-        return currentRangeEnd.hour() === baseDate.hour()
-            // Deshabilitar desde el minuto final inclusive (límite exclusivo)
-            ? disableFromTo(currentRangeEnd.minute(), 60)
-            : [];
+        if (currentRangeEnd.hour() !== baseDate.hour()) return [];
+        const endM = currentRangeEnd.minute();
+        const endS = currentRangeEnd.second();
+        // Si el fin tiene segundos > 0, permitir el minuto final y restringir solo segundos;
+        // si es exacto (HH:MM:00), deshabilitar el minuto final completo.
+        const fromMinute = endS === 0 ? endM : endM + 1;
+        return disableFromTo(fromMinute, 60);
     };
 
     const getDisabledSecondsFromRangeEnd = (currentRangeEnd, baseDate) => {

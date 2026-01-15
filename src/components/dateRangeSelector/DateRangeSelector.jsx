@@ -12,6 +12,7 @@ import DateRangeSelectorLayout from "./DateRangeSelectorLayout";
 import useDisabledDate from "./hooks/useDisabledDate";
 import useDisabledTime from "./hooks/useDisabledTime";
 import { adjustSelection } from "./utils/selectionUtils";
+import { Format } from "./utils/utils";
 
 const DateRangeSelector = ({ onChange, ranges, ...userProps }) => {
     const currentRange = useRef([]);
@@ -30,6 +31,12 @@ const DateRangeSelector = ({ onChange, ranges, ...userProps }) => {
     });
 
     const combinedConfigs = defaultDateRangeConfigs(userProps);
+    const normalizedConfigs = {
+        ...combinedConfigs,
+        format: combinedConfigs.showTime === false
+            ? { format: Format.DATE_ONLY, type: "mask" }
+            : combinedConfigs.format,
+    };
     const getFormatString = (format) => {
         if (typeof format === "string") return format;
         if (Array.isArray(format)) {
@@ -40,9 +47,9 @@ const DateRangeSelector = ({ onChange, ranges, ...userProps }) => {
         return format?.format;
     };
 
-    const formatString = getFormatString(combinedConfigs.format);
+    const formatString = getFormatString(normalizedConfigs.format);
     const hasSecondsPrecision = Boolean(formatString && formatString.includes("ss"));
-    const autoAdjustMidnight = combinedConfigs.autoAdjustMidnight ?? !combinedConfigs.showTime;
+    const autoAdjustMidnight = normalizedConfigs.autoAdjustMidnight ?? !normalizedConfigs.showTime;
 
     const { handleDisabledTime } = useDisabledTime({
         currentMode,
@@ -93,7 +100,7 @@ const DateRangeSelector = ({ onChange, ranges, ...userProps }) => {
                 onChange={handleOnChange}
                 onPanelChange={handleOnPanelChange}
                 preserveInvalidOnBlur={false}
-                {...combinedConfigs}
+                {...normalizedConfigs}
             />
         </DateRangeSelectorLayout>
     );

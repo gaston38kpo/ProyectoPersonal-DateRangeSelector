@@ -1,7 +1,7 @@
 /* eslint-disable no-magic-numbers */
 import React, { useState } from "react";
 
-import { Card, Layout, Select, Space, Tooltip, Typography } from "antd";
+import { Card, Layout, Select, Space, Switch, Tooltip, Typography } from "antd";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -30,6 +30,7 @@ const DEFAULT_RANGES = [
 const Dashboard = () => {
     const [selected, setSelected] = useState([null, null]);
     const [rawRanges, setRawRanges] = useState(DEFAULT_RANGES);
+    const [showTime, setShowTime] = useState(false);
     const { adjustedDateRanges } = useAdjustDateRangesFromToday({ dateRanges: rawRanges });
 
     const handleOnChange = (range) => {
@@ -208,13 +209,28 @@ const Dashboard = () => {
                             value={null}
                         />
                     </Card>
-                    <Card size="small" title="Selecciona un rango">
+                    <Card
+                        size="small"
+                        title="Selecciona un rango"
+                        extra={(
+                            <Space size={8}>
+                                <Text>
+                                    Mostrar horas
+                                </Text>
+                                <Switch
+                                    checked={showTime}
+                                    onChange={setShowTime}
+                                    size="small"
+                                />
+                            </Space>
+                        )}
+                    >
                         <DateRangeSelector
                             allowEmpty={[true, true]}
                             format={{ format: Format.UP_TO_MINUTES, type: "mask" }}
                             onChange={handleOnChange}
                             ranges={adjustedDateRanges}
-                            showTime
+                            showTime={showTime}
                         />
                     </Card>
 

@@ -6,10 +6,12 @@ import PropTypes from "prop-types";
 import { DatePicker } from "antd";
 import dayjs from "dayjs";
 
+import "./utils/setupDayjs";
 import defaultDateRangeConfigs from "./data/defaultDateRangeConfigs";
 import DateRangeSelectorLayout from "./DateRangeSelectorLayout";
 import useDisabledDate from "./hooks/useDisabledDate";
 import useDisabledTime from "./hooks/useDisabledTime";
+import { adjustSelection } from "./utils/selectionUtils";
 
 const DateRangeSelector = ({ onChange, ranges, ...userProps }) => {
     const currentRange = useRef([]);
@@ -28,10 +30,19 @@ const DateRangeSelector = ({ onChange, ranges, ...userProps }) => {
     });
 
     const combinedConfigs = defaultDateRangeConfigs(userProps);
-    const formatString = typeof combinedConfigs.format === "string"
-        ? combinedConfigs.format
-        : combinedConfigs.format?.format;
+    const getFormatString = (format) => {
+        if (typeof format === "string") return format;
+        if (Array.isArray(format)) {
+            const [first] = format;
+            if (typeof first === "string") return first;
+            return first?.format;
+        }
+        return format?.format;
+    };
+
+    const formatString = getFormatString(combinedConfigs.format);
     const hasSecondsPrecision = Boolean(formatString && formatString.includes("ss"));
+    const autoAdjustMidnight = combinedConfigs.autoAdjustMidnight ?? !combinedConfigs.showTime;
 
     const { handleDisabledTime } = useDisabledTime({
         currentMode,
@@ -41,29 +52,6 @@ const DateRangeSelector = ({ onChange, ranges, ...userProps }) => {
         value,
     });
 
-    const getMinTimeForDate = (date) => {
-        const [rangeStart] = currentRange.current || [];
-        if (!date) return null;
-        if (!rangeStart) return date.startOf("day");
-        // Día de inicio real del rango: start+1d; mínimo permitido es start+1s (límite exclusivo)
-        const firstDay = rangeStart.add(1, "day");
-        return date.isSame(firstDay, "day")
-            ? firstDay.add(1, "second")
-            : date.startOf("day");
-    };
-
-    const getMaxTimeForDate = (date) => {
-        const [, rangeEnd] = currentRange.current || [];
-        if (!date) return null;
-        if (!rangeEnd) return date.endOf("day");
-        // Máximo permitido es end-1s (límite exclusivo en el tope del rango)
-        return date.isSame(rangeEnd, "day")
-            ? rangeEnd.subtract(1, "second")
-            : date.endOf("day");
-    };
-
-    const isMidnight = (d) => d && d.hour() === 0 && d.minute() === 0 && d.second() === 0;
-
     const handleOnChange = (dates, dateStrings) => {
         if (!onChange) return;
 
@@ -72,36 +60,14 @@ const DateRangeSelector = ({ onChange, ranges, ...userProps }) => {
             return;
         }
 
-        let [start, end] = dates;
-
-        // Si no se eligió hora explícita, usar min/max disponible del día
-        if (isMidnight(start)) start = getMinTimeForDate(start);
-
-        if (isMidnight(end)) end = getMaxTimeForDate(end);
-
-        // Ajuste cuando el formato no incluye segundos: corregir segundos en bordes del rango
-        if (!hasSecondsPrecision) {
-            const [rangeStart, rangeEnd] = currentRange.current || [];
-            if (rangeStart && start) {
-                const firstDay = rangeStart.add(1, "day");
-                const atStartEdge = start.isSame(firstDay, "day")
-                    && start.hour() === rangeStart.hour()
-                    && start.minute() === rangeStart.minute();
-                if (atStartEdge) start = start.second(Math.min(rangeStart.second() + 1, 59));
-            }
-            if (rangeEnd && end) {
-                const atEndEdge = end.isSame(rangeEnd, "day")
-                    && end.hour() === rangeEnd.hour()
-                    && end.minute() === rangeEnd.minute();
-                if (atEndEdge) end = end.second(Math.max(rangeEnd.second() - 1, 0));
-            }
-        }
-
-        const adjustedDates = [start, end];
-
-        const adjustedStrings = formatString
-            ? [start?.format(formatString) ?? "", end?.format(formatString) ?? ""]
-            : dateStrings;
+        const { adjustedDates, adjustedStrings } = adjustSelection({
+            dates,
+            dateStrings,
+            currentRange: currentRange.current,
+            formatString,
+            hasSecondsPrecision,
+            autoAdjustMidnight,
+        });
 
         onChange(adjustedDates, adjustedStrings);
     };

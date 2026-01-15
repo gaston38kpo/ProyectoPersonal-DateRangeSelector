@@ -1,5 +1,6 @@
 /* eslint-disable no-magic-numbers */
 import dayjs from "dayjs";
+import "./setupDayjs";
 
 const isDateBeforeToday = (current) =>
     current.isBefore(dayjs(), "day");
@@ -22,12 +23,12 @@ const removePastRanges = (sortedDateRanges) =>
     sortedDateRanges.filter(({ end }) => dayjs(end).isAfter(dayjs()));
 
 const adjustFirstRangeForToday = (rangesAfterToday) => {
-    if (!rangesAfterToday.length) 
+    if (!rangesAfterToday.length)
         return [];
 
     const [firstRange, ...remainingRanges] = rangesAfterToday;
     const { end, start } = firstRange;
-    
+
     if (dayjs(start).isAfter(dayjs()))
         return rangesAfterToday;
 

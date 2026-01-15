@@ -1,5 +1,6 @@
 /* eslint-disable no-magic-numbers */
 import dayjs from "dayjs";
+import "../utils/setupDayjs";
 import { useState } from "react";
 
 const useDisabledDate = ({
@@ -53,13 +54,13 @@ const useDisabledDate = ({
 
     const adjustAccordingNamedValueSelected = (date) => {
         const [start, end] = value.current;
-        
+
         if (!currentNamedValueSelected)
             return date;
-        
+
         if (currentNamedValueSelected === "start")
             return end ? date.endOf("day") : date.startOf("day");
-        
+
         if (currentNamedValueSelected === "end")
             return start ? date.startOf("day") : date.endOf("day");
     };

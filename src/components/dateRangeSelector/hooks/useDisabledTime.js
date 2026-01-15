@@ -17,35 +17,35 @@ const useDisabledTime = ({
 
         if (!isSelectingValue || !currentRange.current.length)
             return {
-                disabledHours: () => disableFromTo(0, 24),
-                disabledMinutes: () => disableFromTo(0, 60),
-                disabledSeconds: () => disableFromTo(0, 60),
+                disabledHours: () => [],
+                disabledMinutes: () => [],
+                disabledSeconds: () => [],
             };
-            
+
         const [valueStart, valueEnd] = value.current;
 
         const baseDate = type === "start" ? valueStart : valueEnd;
 
         if (!baseDate) return;
-        
+
         const isBaseDateSameCurrentRangeStart = baseDate.isSame(currentRangeStart.add(1, "day"), "day");
         const isBaseDateSameCurrentRangeEnd = baseDate.isSame(currentRangeEnd, "day");
 
-        if (isBaseDateSameCurrentRangeStart) 
+        if (isBaseDateSameCurrentRangeStart)
             return {
                 disabledHours: () => getDisabledHoursFromRangeStart(currentRangeStart),
                 disabledMinutes: () => getDisabledMinutesFromRangeStart(currentRangeStart, baseDate),
                 disabledSeconds: () => hasSecondsPrecision ? getDisabledSecondsFromRangeStart(currentRangeStart, baseDate) : [],
             };
-        
-        
-        if (isBaseDateSameCurrentRangeEnd) 
+
+
+        if (isBaseDateSameCurrentRangeEnd)
             return {
                 disabledHours: () => getDisabledHoursFromRangeEnd(currentRangeEnd),
                 disabledMinutes: () => getDisabledMinutesFromRangeEnd(currentRangeEnd, baseDate),
                 disabledSeconds: () => hasSecondsPrecision ? getDisabledSecondsFromRangeEnd(currentRangeEnd, baseDate) : [],
             };
-        
+
     };
 
 

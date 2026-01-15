@@ -8,6 +8,15 @@ import { adjustFirstRangeForToday, isDateBeforeToday, parseDateRangesToDayjs, re
 dayjs.extend(utc);
 dayjs.extend(isBetween);
 
+beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date("2026-01-14T12:00:00Z"));
+});
+
+afterAll(() => {
+    jest.useRealTimers();
+});
+
 describe("isDateBeforeToday", () => {
     test("Devuelve true si la fecha es antes de hoy", () => {
         const pastDate = dayjs().subtract(1, "day");
@@ -27,7 +36,7 @@ describe("isDateBeforeToday", () => {
     test("Maneja correctamente fechas en el límite (medianoche)", () => {
         const todayStart = dayjs().startOf("day");
         expect(isDateBeforeToday(todayStart)).toBe(false);
-        
+
         const yesterdayEnd = dayjs().subtract(1, "day").endOf("day");
         expect(isDateBeforeToday(yesterdayEnd)).toBe(true);
     });
@@ -53,28 +62,28 @@ describe("parseDateRangesToDayjs", () => {
 
     test("Maneja correctamente objetos dayjs como entrada", () => {
         const dateRangesList = [
-            { 
-                start: dayjs("2024-11-01T10:00:00Z"), 
-                end: dayjs("2024-11-02T10:00:00Z"), 
+            {
+                start: dayjs("2024-11-01T10:00:00Z"),
+                end: dayjs("2024-11-02T10:00:00Z"),
             },
         ];
 
         const result = parseDateRangesToDayjs(dateRangesList);
-        
+
         expect(result[0].start.isSame(dayjs("2024-10-31T10:00:00Z").utc())).toBe(true);
         expect(result[0].end.isSame(dayjs("2024-11-02T10:00:00Z"))).toBe(true);
     });
 
     test("Maneja correctamente objetos Date como entrada", () => {
         const dateRangesList = [
-            { 
-                start: new Date("2024-11-01T10:00:00Z"), 
-                end: new Date("2024-11-02T10:00:00Z"), 
+            {
+                start: new Date("2024-11-01T10:00:00Z"),
+                end: new Date("2024-11-02T10:00:00Z"),
             },
         ];
 
         const result = parseDateRangesToDayjs(dateRangesList);
-        
+
         expect(result[0].start.isSame(dayjs("2024-10-31T10:00:00Z").utc())).toBe(true);
         expect(result[0].end.isSame(dayjs("2024-11-02T10:00:00Z"))).toBe(true);
     });
@@ -116,7 +125,7 @@ describe("sortDateRanges", () => {
         ];
 
         const sortedRanges = sortDateRanges(rangesWithSameStart);
-        
+
         // Verificamos que ambos rangos tengan la misma fecha de inicio
         expect(sortedRanges[0].start.isSame(sortedRanges[1].start)).toBe(true);
     });
@@ -205,7 +214,7 @@ describe("adjustFirstRangeForToday", () => {
         ];
 
         const adjustedRanges = adjustFirstRangeForToday(ranges);
-        
+
         // Verificamos que el array se mantiene igual
         expect(adjustedRanges).toEqual(ranges);
     });
@@ -222,7 +231,7 @@ describe("adjustFirstRangeForToday", () => {
         ];
 
         const adjustedRanges = adjustFirstRangeForToday(ranges);
-        
+
         // Verificamos que el primer rango no se ajusta porque termina antes de hoy
         expect(dayjs(adjustedRanges[0].start).isSame(dayjs(ranges[0].start))).toBe(true);
         expect(dayjs(adjustedRanges[0].end).isSame(dayjs(ranges[0].end))).toBe(true);
@@ -235,7 +244,7 @@ describe("adjustFirstRangeForToday", () => {
         ];
 
         const adjustedRanges = adjustFirstRangeForToday(ranges);
-        
+
         // Corregido: comparamos solo a nivel de día para evitar problemas con milisegundos
         const startDate = dayjs(adjustedRanges[0].start);
         const todayStart = dayjs().startOf("day");

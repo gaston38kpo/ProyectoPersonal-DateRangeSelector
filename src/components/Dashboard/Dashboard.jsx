@@ -210,8 +210,6 @@ const Dashboard = () => {
                         />
                     </Card>
                     <Card
-                        size="small"
-                        title="Selecciona un rango"
                         extra={(
                             <Space size={8}>
                                 <Text>
@@ -224,6 +222,8 @@ const Dashboard = () => {
                                 />
                             </Space>
                         )}
+                        size="small"
+                        title="Selecciona un rango"
                     >
                         <DateRangeSelector
                             allowEmpty={[true, true]}
